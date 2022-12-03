@@ -12,17 +12,29 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
+import com.ataatasoy.readingisgood.assemblers.CustomerModelAssembler;
+import com.ataatasoy.readingisgood.assemblers.OrderModelAssembler;
 import com.ataatasoy.readingisgood.exceptions.CustomerNotFoundException;
 import com.ataatasoy.readingisgood.models.Customer;
 import com.ataatasoy.readingisgood.models.Order;
 import com.ataatasoy.readingisgood.repository.CustomerRepository;
 
+import lombok.Data;
+
+@Data
 @RestController
 public class CustomerController {
     private final CustomerRepository repository;
+    private final CustomerModelAssembler cModelAssembler;
+    private final OrderModelAssembler oModelAssembler;
 
-    CustomerController(CustomerRepository repository) {
-        this.repository = repository;
+    @GetMapping("/customers")
+    public CollectionModel<EntityModel<Customer>> all() {
+        List<EntityModel<Customer>> customers = repository.findAll().stream() //
+                .map(cModelAssembler::toModel)
+                .collect(Collectors.toList());
+
+        return CollectionModel.of(customers, linkTo(methodOn(CustomerController.class).all()).withSelfRel());
     }
 
     @PostMapping("/customers")
@@ -30,14 +42,20 @@ public class CustomerController {
         return repository.save(newCustomer);
     }
 
+    @GetMapping("/customers/{id}")
+    public EntityModel<Customer> one(@PathVariable long id) {
+        Customer customer = repository.findById(id).orElseThrow(() -> new CustomerNotFoundException(id));
+
+        return cModelAssembler.toModel(customer);
+    }
+
     @GetMapping("/customers/orders/{id}")
-    CollectionModel<EntityModel<Order>> all(@PathVariable long id) {
+    CollectionModel<EntityModel<Order>> allOrders(@PathVariable long id) {
         Customer c = repository.findById(id).orElseThrow(() -> new CustomerNotFoundException(id));
 
-        List<EntityModel<Order>> orders = c.getOrderList().stream().map(order -> EntityModel.of(order,
-                linkTo(methodOn(OrderController.class).one(order.getId())).withSelfRel(),
-                linkTo(methodOn(OrderController.class).all()).withRel("orders")))
-            .collect(Collectors.toList());
+        List<EntityModel<Order>> orders = c.getOrderList().stream()
+                .map(oModelAssembler::toModel)
+                .collect(Collectors.toList());
 
         return CollectionModel.of(orders, linkTo(methodOn(OrderController.class).all()).withSelfRel());
     }

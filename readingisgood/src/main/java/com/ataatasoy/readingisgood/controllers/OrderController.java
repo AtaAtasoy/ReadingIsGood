@@ -3,8 +3,11 @@ package com.ataatasoy.readingisgood.controllers;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ataatasoy.readingisgood.assemblers.OrderModelAssembler;
 import com.ataatasoy.readingisgood.exceptions.OrderNotFoundException;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
@@ -16,30 +19,35 @@ import org.springframework.hateoas.CollectionModel;
 import com.ataatasoy.readingisgood.models.Order;
 import com.ataatasoy.readingisgood.repository.OrderRepository;
 
+import lombok.Data;
+
+@Data
 @RestController
 public class OrderController {
     private final OrderRepository repository;
-
-    OrderController(OrderRepository repository) {
-        this.repository = repository;
-    }
-
+    private final OrderModelAssembler assembler;
+    
     @GetMapping("/orders")
+    public
     CollectionModel<EntityModel<Order>> all() {
         List<EntityModel<Order>> orders = repository.findAll().stream()
-                .map(order -> EntityModel.of(order,
-                        linkTo(methodOn(OrderController.class).one(order.getId())).withSelfRel(),
-                        linkTo(methodOn(OrderController.class).all()).withRel("orders")))
+                .map(assembler::toModel)
                 .collect(Collectors.toList());
 
         return CollectionModel.of(orders, linkTo(methodOn(OrderController.class).all()).withSelfRel());
     }
 
     @GetMapping("/orders/{id}")
+    public
     EntityModel<Order> one(@PathVariable long id) {
         Order order = repository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
 
-        return EntityModel.of(order, linkTo(methodOn(OrderController.class).one(id)).withSelfRel(),
-                linkTo(methodOn(OrderController.class).all()).withRel("orders"));
+        return assembler.toModel(order);
+    }
+
+    @PostMapping("/orders")
+    EntityModel<Order> newOrder(@RequestBody Order newOrder){
+        //TODO: Update the stocks
+        return EntityModel.of(repository.save(newOrder), linkTo(methodOn(OrderController.class).one(newOrder.getId())).withSelfRel());
     }
 }

@@ -8,18 +8,20 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+@AllArgsConstructor
 @RequiredArgsConstructor
 @NoArgsConstructor
 @Data
 @Entity
 @Table(name = "customers")
 public class Customer{
-    private @Id @GeneratedValue Long id; 
+    private @Id @GeneratedValue long id; 
     private @NonNull String name;
     private @NonNull String surname;
     private @NonNull String email;
