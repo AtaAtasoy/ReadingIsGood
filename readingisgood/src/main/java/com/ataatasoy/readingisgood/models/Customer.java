@@ -21,11 +21,10 @@ import lombok.RequiredArgsConstructor;
 @Entity
 @Table(name = "customers")
 public class Customer{
-    private @Id @GeneratedValue long id; 
+    private @Id @GeneratedValue Long id; 
     private @NonNull String name;
     private @NonNull String surname;
     private @NonNull String email;
-    private @NonNull String password;
 
     @OneToMany(targetEntity = com.ataatasoy.readingisgood.models.Order.class, cascade = CascadeType.ALL)
     private @NonNull List<Order> orderList;

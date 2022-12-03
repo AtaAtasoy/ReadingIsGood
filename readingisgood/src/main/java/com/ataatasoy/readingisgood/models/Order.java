@@ -24,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 @Entity
 @Table(name="orders")
 public class Order {
-    private @Id @GeneratedValue long id;
+    private @Id @GeneratedValue Long id;
     private @CreationTimestamp Date createdAt;
 
     @ManyToMany(targetEntity = com.ataatasoy.readingisgood.models.Book.class, cascade = CascadeType.ALL)

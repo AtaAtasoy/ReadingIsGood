@@ -26,7 +26,7 @@ public class LoadDatabase {
       OrderRepository oRepository) {
     Book b1 = new Book("1984", "George Orwell");
     Book b2 = new Book("Harry Potter and the Prisoner of Azkaban", "J.K. Rowling");
-    Customer c1 = new Customer("Doga", "Erdem", "doga@email.com", "supersecret", new ArrayList<Order>());
+    Customer c1 = new Customer("Doga", "Erdem", "doga@email.com", new ArrayList<Order>());
     Order o1 = new Order(Arrays.asList(b1, b2));
     c1.getOrderList().add(o1);
 

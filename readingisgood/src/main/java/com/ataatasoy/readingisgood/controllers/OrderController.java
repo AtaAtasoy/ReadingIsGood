@@ -39,7 +39,7 @@ public class OrderController {
 
     @GetMapping("/orders/{id}")
     public
-    EntityModel<Order> one(@PathVariable long id) {
+    EntityModel<Order> one(@PathVariable Long id) {
         Order order = repository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
 
         return assembler.toModel(order);

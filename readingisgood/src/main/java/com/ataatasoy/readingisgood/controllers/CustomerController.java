@@ -43,14 +43,14 @@ public class CustomerController {
     }
 
     @GetMapping("/customers/{id}")
-    public EntityModel<Customer> one(@PathVariable long id) {
+    public EntityModel<Customer> one(@PathVariable Long id) {
         Customer customer = repository.findById(id).orElseThrow(() -> new CustomerNotFoundException(id));
 
         return cModelAssembler.toModel(customer);
     }
 
     @GetMapping("/customers/orders/{id}")
-    CollectionModel<EntityModel<Order>> allOrders(@PathVariable long id) {
+    CollectionModel<EntityModel<Order>> allOrders(@PathVariable Long id) {
         Customer c = repository.findById(id).orElseThrow(() -> new CustomerNotFoundException(id));
 
         List<EntityModel<Order>> orders = c.getOrderList().stream()
