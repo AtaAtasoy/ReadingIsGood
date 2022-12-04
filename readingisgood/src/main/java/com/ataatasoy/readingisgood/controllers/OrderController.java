@@ -34,6 +34,7 @@ import lombok.Data;
 public class OrderController {
     private final OrderRepository repository;
     private final OrderModelAssembler assembler;
+    private final CustomerController customerController;
 
     @GetMapping("/orders")
     public CollectionModel<EntityModel<Order>> all() {
@@ -54,7 +55,10 @@ public class OrderController {
     @PostMapping("/orders")
     EntityModel<Order> newOrder(@RequestBody Order newOrder) {
         newOrder.setStatus(Status.IN_PROGRESS);
-        // TODO: Update the stocks
+        newOrder.setCustomer(newOrder.getCustomer());
+        newOrder.getCustomer().addOrder(newOrder);
+        
+        // TODO: Update the stocks and update the many-to-many relation
         return EntityModel.of(repository.save(newOrder),
                 linkTo(methodOn(OrderController.class).one(newOrder.getId())).withSelfRel());
     }

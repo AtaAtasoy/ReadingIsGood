@@ -25,18 +25,19 @@ public class LoadDatabase {
     @Bean
     CommandLineRunner initDatabase(CustomerRepository cRepository, BookRepository bRepository,
             OrderRepository oRepository) {
-        Book b1 = new Book("1984", "George Orwell", new ArrayList<Order>());
-        Book b2 = new Book("Harry Potter and the Prisoner of Azkaban", "J.K. Rowling", new ArrayList<Order>());
+        Book b1 = new Book("1984", "George Orwell");
+        Book b2 = new Book("Harry Potter and the Prisoner of Azkaban", "J.K. Rowling");
         
         Customer c1 = new Customer("Doga", "Erdem", "doga@email.com");
-        Order o1 = new Order(Status.IN_PROGRESS, Arrays.asList(b1, b2));
+        Order o1 = new Order(Status.IN_PROGRESS);
         
         b1.addToOrder(o1);
         b2.addToOrder(o1);
+        o1.addBook(b1);
+        o1.addBook(b2);
 
         o1.setCustomer(c1);
-        c1.setOrders(new ArrayList<>());
-        c1.getOrders().add(o1);
+        c1.addOrder(o1);
 
         return args -> {
             log.info("Preloading " + bRepository.save(b1));

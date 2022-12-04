@@ -1,5 +1,6 @@
 package com.ataatasoy.readingisgood.models;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -29,7 +30,7 @@ import lombok.Setter;
 @Table(name = "customers")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, 
                   property  = "id", 
-                  scope     = Long.class)
+                  scope     = Customer.class)
 public class Customer{
     private @Id @GeneratedValue Long id; 
     private @NonNull String name;
@@ -37,5 +38,9 @@ public class Customer{
     private @NonNull @Column(unique = true) String email;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-    public List<Order> orders;
+    private List<Order> orders = new ArrayList<>();
+
+    public void addOrder(Order o){
+        orders.add(o);
+    }
 }

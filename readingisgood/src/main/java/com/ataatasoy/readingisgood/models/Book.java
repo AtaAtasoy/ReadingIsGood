@@ -10,6 +10,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -31,7 +32,7 @@ import jakarta.persistence.Entity;
 @Table(name = "books")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, 
                   property  = "id", 
-                  scope     = Long.class)
+                  scope     = Book.class)
 public class Book {
     private @Id @GeneratedValue Long id;
     private @NonNull @Column(unique = true) String name;
@@ -42,7 +43,7 @@ public class Book {
     private double price;
     
     @ManyToMany(mappedBy = "orderedBooks")
-    private @NonNull List<Order> ordersIncludedIn;
+    private List<Order> ordersIncludedIn = new ArrayList<>();
 
     public void addToOrder(Order order){
         ordersIncludedIn.add(order);
