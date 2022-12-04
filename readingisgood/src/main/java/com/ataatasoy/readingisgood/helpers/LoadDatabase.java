@@ -28,11 +28,16 @@ public class LoadDatabase {
         Book b1 = new Book();
         b1.setName("1984");
         b1.setAuthor("George Orwell");
+        b1.setPrice(32.0);
+        b1.setStock(20);
+        b1.setOrderAmount(0);
 
         Book b2 = new Book();
         b2.setName("Harry Potter and the Prisoner of Azkaban"); 
         b2.setAuthor("J.K. Rowling");
-
+        b2.setPrice(32.9);
+        b2.setStock(29);
+        b2.setOrderAmount(0);
         
         Customer c1 = new Customer();
         c1.setName("Doga");

@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import jakarta.persistence.Column;
@@ -33,11 +34,9 @@ import jakarta.persistence.Entity;
 @Setter
 @Entity
 @Table(name = "books")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, 
-                  property  = "id", 
-                  scope     = Book.class)
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = Book.class)
 @JsonIgnoreProperties("ordersIncludedIn")
-public class Book{
+public class Book {
     private @Id @GeneratedValue Long id;
     private @Column(unique = true) String name;
     private String author;
@@ -45,12 +44,13 @@ public class Book{
     private @UpdateTimestamp Date lastUpdatedAt;
     private Integer stock;
     private Double price;
-    private @JsonIgnore Integer orderAmount;
-    
+
+    private Integer orderAmount = 0;
+
     @ManyToMany(mappedBy = "orderedBooks")
     private List<Order> ordersIncludedIn = new ArrayList<>();
 
-    public void addToOrder(Order order){
+    public void addToOrder(Order order) {
         ordersIncludedIn.add(order);
     }
 }

@@ -77,6 +77,8 @@ public class BookController {
 
             if (newBook.getPrice() != null)
                 book.setPrice(newBook.getPrice());
+            if (newBook.getOrderAmount() != null)
+                book.setOrderAmount(newBook.getOrderAmount());
             return repository.save(book);
         })
                 .orElseGet(() -> {

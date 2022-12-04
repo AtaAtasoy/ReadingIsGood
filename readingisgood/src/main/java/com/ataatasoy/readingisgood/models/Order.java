@@ -1,6 +1,7 @@
 package com.ataatasoy.readingisgood.models;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.RepresentationModel;
@@ -12,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -42,7 +44,8 @@ import lombok.Setter;
 
 public class Order{
     private @Id @GeneratedValue Long id;
-    private @CreationTimestamp Date createdAt;
+    
+    private  @CreationTimestamp @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime createdAt;
     private @lombok.NonNull Status status;
     
     @ManyToOne
