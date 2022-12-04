@@ -2,7 +2,9 @@ package com.ataatasoy.readingisgood.models;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -25,13 +27,15 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "customers")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, 
+                  property  = "id", 
+                  scope     = Long.class)
 public class Customer{
     private @Id @GeneratedValue Long id; 
     private @NonNull String name;
     private @NonNull String surname;
     private @NonNull @Column(unique = true) String email;
 
-    @JsonManagedReference
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-    public @NonNull List<Order> orders;
+    public List<Order> orders;
 }

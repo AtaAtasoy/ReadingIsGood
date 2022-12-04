@@ -28,16 +28,19 @@ public class LoadDatabase {
         Book b1 = new Book("1984", "George Orwell", new ArrayList<Order>());
         Book b2 = new Book("Harry Potter and the Prisoner of Azkaban", "J.K. Rowling", new ArrayList<Order>());
         
-        Customer c1 = new Customer("Doga", "Erdem", "doga@email.com", new ArrayList<Order>());
+        Customer c1 = new Customer("Doga", "Erdem", "doga@email.com");
         Order o1 = new Order(Status.IN_PROGRESS, Arrays.asList(b1, b2));
         
         b1.addToOrder(o1);
         b2.addToOrder(o1);
 
         o1.setCustomer(c1);
+        c1.setOrders(new ArrayList<>());
         c1.getOrders().add(o1);
 
         return args -> {
+            log.info("Preloading " + bRepository.save(b1));
+            log.info("Preloading " + bRepository.save(b2));
             log.info("Preloading " + cRepository.save(c1));
             log.info("Preloading " + oRepository.save(o1));
           
