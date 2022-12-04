@@ -51,7 +51,6 @@ public class CustomerController {
         } catch (DataIntegrityViolationException e) {
             throw new CustomerAlreadyExistsException(newCustomer.getEmail());
         }
-        
     }
 
 

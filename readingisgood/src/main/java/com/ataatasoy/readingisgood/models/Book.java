@@ -25,7 +25,7 @@ import jakarta.persistence.Entity;
 @Table(name = "books")
 public class Book {
     private @Id @GeneratedValue Long id;
-    private @NonNull String name;
+    private @NonNull @Column(unique = true) String name;
     private @NonNull String author;
     private @CreationTimestamp @Column(updatable = false) Date createdAt;
     private @UpdateTimestamp Date lastUpdatedAt;
