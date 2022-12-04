@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ataatasoy.readingisgood.assemblers.OrderModelAssembler;
 import com.ataatasoy.readingisgood.exceptions.OrderNotFoundException;
+
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import java.util.List;
@@ -23,8 +24,11 @@ import java.util.stream.Collectors;
 
 import org.springframework.hateoas.CollectionModel;
 
+import com.ataatasoy.readingisgood.models.Book;
 import com.ataatasoy.readingisgood.models.Order;
 import com.ataatasoy.readingisgood.models.Status;
+import com.ataatasoy.readingisgood.repository.BookRepository;
+import com.ataatasoy.readingisgood.repository.CustomerRepository;
 import com.ataatasoy.readingisgood.repository.OrderRepository;
 
 import lombok.Data;
@@ -32,13 +36,16 @@ import lombok.Data;
 @Data
 @RestController
 public class OrderController {
-    private final OrderRepository repository;
+    private final OrderRepository orderRepository;
+    private final BookRepository bookRepository;
     private final OrderModelAssembler assembler;
     private final CustomerController customerController;
+    private final BookController bookController;
+    private final CustomerRepository customerRepository;
 
     @GetMapping("/orders")
     public CollectionModel<EntityModel<Order>> all() {
-        List<EntityModel<Order>> orders = repository.findAll().stream()
+        List<EntityModel<Order>> orders = orderRepository.findAll().stream()
                 .map(assembler::toModel)
                 .collect(Collectors.toList());
 
@@ -47,7 +54,7 @@ public class OrderController {
 
     @GetMapping("/orders/{id}")
     public EntityModel<Order> one(@PathVariable Long id) {
-        Order order = repository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
+        Order order = orderRepository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
 
         return assembler.toModel(order);
     }
@@ -57,18 +64,21 @@ public class OrderController {
         newOrder.setStatus(Status.IN_PROGRESS);
         newOrder.getCustomer().addOrder(newOrder);
 
-        // TODO: Update the stocks and update the many-to-many relation
-        return EntityModel.of(repository.save(newOrder),
+        for (Book bookInOrder: newOrder.getOrderedBooks()){
+            // Populate the given orders
+        }
+       
+        return EntityModel.of(orderRepository.save(newOrder),
                 linkTo(methodOn(OrderController.class).one(newOrder.getId())).withSelfRel());
     }
 
     @DeleteMapping("/orders/{id}/cancel")
     public ResponseEntity<?> cancel(@PathVariable Long id) {
-        Order order = repository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
+        Order order = orderRepository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
 
         if (order.getStatus() == Status.IN_PROGRESS) {
             order.setStatus(Status.CANCELLED);
-            return ResponseEntity.ok(assembler.toModel(repository.save(order)));
+            return ResponseEntity.ok(assembler.toModel(orderRepository.save(order)));
         }
 
         return ResponseEntity //
@@ -82,12 +92,12 @@ public class OrderController {
     @PutMapping("/orders/{id}/complete")
     public ResponseEntity<?> complete(@PathVariable Long id) {
 
-        Order order = repository.findById(id) //
+        Order order = orderRepository.findById(id) //
                 .orElseThrow(() -> new OrderNotFoundException(id));
 
         if (order.getStatus() == Status.IN_PROGRESS) {
             order.setStatus(Status.COMPLETED);
-            return ResponseEntity.ok(assembler.toModel(repository.save(order)));
+            return ResponseEntity.ok(assembler.toModel(orderRepository.save(order)));
         }
 
         return ResponseEntity //
@@ -97,5 +107,4 @@ public class OrderController {
                         .withTitle("Method not allowed") //
                         .withDetail("You can't complete an order that is in the " + order.getStatus() + " status"));
     }
-
 }

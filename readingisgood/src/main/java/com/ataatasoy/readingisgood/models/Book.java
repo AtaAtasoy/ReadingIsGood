@@ -15,18 +15,19 @@ import java.util.Date;
 import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.hateoas.RepresentationModel;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 
-@RequiredArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -38,12 +39,13 @@ import jakarta.persistence.Entity;
 @JsonIgnoreProperties("ordersIncludedIn")
 public class Book{
     private @Id @GeneratedValue Long id;
-    private @NonNull @Column(unique = true) String name;
-    private @NonNull String author;
+    private @Column(unique = true) String name;
+    private String author;
     private @CreationTimestamp @Column(updatable = false) Date createdAt;
     private @UpdateTimestamp Date lastUpdatedAt;
-    private int stock;
-    private double price;
+    private Integer stock;
+    private Double price;
+    private @JsonIgnore Integer orderAmount;
     
     @ManyToMany(mappedBy = "orderedBooks")
     private List<Order> ordersIncludedIn = new ArrayList<>();

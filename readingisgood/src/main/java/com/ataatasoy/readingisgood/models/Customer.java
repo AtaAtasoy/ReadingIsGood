@@ -15,15 +15,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
-@AllArgsConstructor
-@RequiredArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -35,9 +30,9 @@ import lombok.Setter;
 @JsonIgnoreProperties("orders")
 public class Customer{
     private @Id @GeneratedValue Long id; 
-    private @NonNull String name;
-    private @NonNull String surname;
-    private @NonNull @Column(unique = true) String email;
+    private String name;
+    private String surname;
+    private @Column(unique = true) String email;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders = new ArrayList<>();

@@ -62,10 +62,21 @@ public class BookController {
     @PutMapping("/books/{id}")
     ResponseEntity<?> updateBook(@RequestBody Book newBook, @PathVariable Long id) {
         Book updatedBook = repository.findById(id).map(book -> {
-            book.setStock(newBook.getStock());
-            book.setAuthor(newBook.getAuthor());
-            book.setPrice(newBook.getPrice());
-            book.setName(newBook.getName());
+            // There has to be a better way
+            if (newBook.getAuthor() != null)
+                book.setAuthor(newBook.getAuthor());
+
+            if (newBook.getName() != null)
+                book.setName(newBook.getName());
+
+            if (newBook.getOrderAmount() != null)
+                book.setStock(book.getStock() - newBook.getOrderAmount());
+
+            if (newBook.getStock() != null)
+                book.setStock(newBook.getStock());
+
+            if (newBook.getPrice() != null)
+                book.setPrice(newBook.getPrice());
             return repository.save(book);
         })
                 .orElseGet(() -> {

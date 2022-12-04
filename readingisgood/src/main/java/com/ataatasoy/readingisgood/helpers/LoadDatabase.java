@@ -25,10 +25,19 @@ public class LoadDatabase {
     @Bean
     CommandLineRunner initDatabase(CustomerRepository cRepository, BookRepository bRepository,
             OrderRepository oRepository) {
-        Book b1 = new Book("1984", "George Orwell");
-        Book b2 = new Book("Harry Potter and the Prisoner of Azkaban", "J.K. Rowling");
+        Book b1 = new Book();
+        b1.setName("1984");
+        b1.setAuthor("George Orwell");
+
+        Book b2 = new Book();
+        b2.setName("Harry Potter and the Prisoner of Azkaban"); 
+        b2.setAuthor("J.K. Rowling");
+
         
-        Customer c1 = new Customer("Doga", "Erdem", "doga@email.com");
+        Customer c1 = new Customer();
+        c1.setName("Doga");
+        c1.setSurname("Erdem");
+        c1.setEmail("doga@email.com");
         Order o1 = new Order(Status.IN_PROGRESS);
         
         b1.addToOrder(o1);
