@@ -67,7 +67,7 @@ public class CustomerController {
     CollectionModel<EntityModel<Order>> allOrders(@PathVariable Long id, @RequestParam(required = false) int offset, @RequestParam(required = false) int pageSize) {
         Customer c = repository.findById(id).orElseThrow(() -> new CustomerNotFoundException(id));
 
-        List<EntityModel<Order>> orders = c.getOrderList().subList(offset, pageSize).stream()
+        List<EntityModel<Order>> orders = c.getOrders().subList(offset, pageSize).stream()
                 .map(oModelAssembler::toModel)
                 .collect(Collectors.toList());
 

@@ -7,7 +7,6 @@ import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
 
 import com.ataatasoy.readingisgood.controllers.BookController;
-import com.ataatasoy.readingisgood.controllers.CustomerController;
 import com.ataatasoy.readingisgood.models.Book;
 
 @Component
@@ -18,6 +17,6 @@ public class BookModelAssembler implements RepresentationModelAssembler<Book, En
 
     return EntityModel.of(book, //
         linkTo(methodOn(BookController.class).one(book.getId())).withSelfRel(),
-        linkTo(methodOn(BookController.class).all()).withRel("customers"));
+        linkTo(methodOn(BookController.class).all()).withRel("books"));
   }
 }

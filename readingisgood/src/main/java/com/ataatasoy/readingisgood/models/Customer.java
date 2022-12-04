@@ -2,6 +2,8 @@ package com.ataatasoy.readingisgood.models;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,15 +12,17 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 @AllArgsConstructor
 @RequiredArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "customers")
 public class Customer{
@@ -27,6 +31,7 @@ public class Customer{
     private @NonNull String surname;
     private @NonNull @Column(unique = true) String email;
 
-    @OneToMany(targetEntity = com.ataatasoy.readingisgood.models.Order.class, cascade = CascadeType.ALL)
-    private @NonNull List<Order> orderList;
+    @JsonManagedReference
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    public @NonNull List<Order> orders;
 }

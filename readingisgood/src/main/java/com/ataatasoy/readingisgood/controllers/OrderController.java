@@ -1,9 +1,16 @@
 package com.ataatasoy.readingisgood.controllers;
 
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.mediatype.problem.Problem;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,6 +24,7 @@ import java.util.stream.Collectors;
 import org.springframework.hateoas.CollectionModel;
 
 import com.ataatasoy.readingisgood.models.Order;
+import com.ataatasoy.readingisgood.models.Status;
 import com.ataatasoy.readingisgood.repository.OrderRepository;
 
 import lombok.Data;
@@ -26,10 +34,9 @@ import lombok.Data;
 public class OrderController {
     private final OrderRepository repository;
     private final OrderModelAssembler assembler;
-    
+
     @GetMapping("/orders")
-    public
-    CollectionModel<EntityModel<Order>> all() {
+    public CollectionModel<EntityModel<Order>> all() {
         List<EntityModel<Order>> orders = repository.findAll().stream()
                 .map(assembler::toModel)
                 .collect(Collectors.toList());
@@ -38,16 +45,54 @@ public class OrderController {
     }
 
     @GetMapping("/orders/{id}")
-    public
-    EntityModel<Order> one(@PathVariable Long id) {
+    public EntityModel<Order> one(@PathVariable Long id) {
         Order order = repository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
 
         return assembler.toModel(order);
     }
 
     @PostMapping("/orders")
-    EntityModel<Order> newOrder(@RequestBody Order newOrder){
-        //TODO: Update the stocks
-        return EntityModel.of(repository.save(newOrder), linkTo(methodOn(OrderController.class).one(newOrder.getId())).withSelfRel());
+    EntityModel<Order> newOrder(@RequestBody Order newOrder) {
+        newOrder.setStatus(Status.IN_PROGRESS);
+        // TODO: Update the stocks
+        return EntityModel.of(repository.save(newOrder),
+                linkTo(methodOn(OrderController.class).one(newOrder.getId())).withSelfRel());
     }
+
+    @DeleteMapping("/orders/{id}/cancel")
+    public ResponseEntity<?> cancel(@PathVariable Long id) {
+        Order order = repository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
+
+        if (order.getStatus() == Status.IN_PROGRESS) {
+            order.setStatus(Status.CANCELLED);
+            return ResponseEntity.ok(assembler.toModel(repository.save(order)));
+        }
+
+        return ResponseEntity //
+                .status(HttpStatus.METHOD_NOT_ALLOWED) //
+                .header(HttpHeaders.CONTENT_TYPE, MediaTypes.HTTP_PROBLEM_DETAILS_JSON_VALUE) //
+                .body(Problem.create() //
+                        .withTitle("Method not allowed") //
+                        .withDetail("You can't cancel an order that is in the " + order.getStatus() + " status"));
+    }
+
+    @PutMapping("/orders/{id}/complete")
+    public ResponseEntity<?> complete(@PathVariable Long id) {
+
+        Order order = repository.findById(id) //
+                .orElseThrow(() -> new OrderNotFoundException(id));
+
+        if (order.getStatus() == Status.IN_PROGRESS) {
+            order.setStatus(Status.COMPLETED);
+            return ResponseEntity.ok(assembler.toModel(repository.save(order)));
+        }
+
+        return ResponseEntity //
+                .status(HttpStatus.METHOD_NOT_ALLOWED) //
+                .header(HttpHeaders.CONTENT_TYPE, MediaTypes.HTTP_PROBLEM_DETAILS_JSON_VALUE) //
+                .body(Problem.create() //
+                        .withTitle("Method not allowed") //
+                        .withDetail("You can't complete an order that is in the " + order.getStatus() + " status"));
+    }
+
 }
