@@ -4,6 +4,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -11,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,6 +27,7 @@ import com.ataatasoy.readingisgood.exceptions.CustomerNotFoundException;
 import com.ataatasoy.readingisgood.models.Customer;
 import com.ataatasoy.readingisgood.models.Order;
 import com.ataatasoy.readingisgood.repository.CustomerRepository;
+import com.ataatasoy.readingisgood.repository.OrderRepository;
 
 import lombok.Data;
 
@@ -31,6 +35,7 @@ import lombok.Data;
 @RestController
 public class CustomerController {
     private final CustomerRepository repository;
+    private final OrderRepository oRepository;
     private final CustomerModelAssembler cModelAssembler;
     private final OrderModelAssembler oModelAssembler;
 
@@ -67,8 +72,11 @@ public class CustomerController {
     @GetMapping("/customers/{id}/orders")
     CollectionModel<EntityModel<Order>> allOrders(@PathVariable Long id, @RequestParam(required = false) int offset, @RequestParam(required = false) int pageSize) {
         Customer c = repository.findById(id).orElseThrow(() -> new CustomerNotFoundException(id));
+        Pageable paging = PageRequest.of(offset, pageSize, Sort.by("createdAt"));
+        List<Order> pagedResult = oRepository.findByCustomerId(c.getId(), paging);
 
-        List<EntityModel<Order>> orders = c.getOrders().subList(offset, pageSize).stream()
+
+        List<EntityModel<Order>> orders = pagedResult.stream()
                 .map(oModelAssembler::toModel)
                 .collect(Collectors.toList());
 

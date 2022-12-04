@@ -55,9 +55,8 @@ public class OrderController {
     @PostMapping("/orders")
     EntityModel<Order> newOrder(@RequestBody Order newOrder) {
         newOrder.setStatus(Status.IN_PROGRESS);
-        newOrder.setCustomer(newOrder.getCustomer());
         newOrder.getCustomer().addOrder(newOrder);
-        
+
         // TODO: Update the stocks and update the many-to-many relation
         return EntityModel.of(repository.save(newOrder),
                 linkTo(methodOn(OrderController.class).one(newOrder.getId())).withSelfRel());

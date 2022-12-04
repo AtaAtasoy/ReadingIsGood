@@ -33,11 +33,11 @@ public class BookController {
 
     @GetMapping("/books")
     public CollectionModel<EntityModel<Book>> all() {
-        List<EntityModel<Book>> customers = repository.findAll().stream() //
+        List<EntityModel<Book>> books = repository.findAll().stream() //
                 .map(assembler::toModel)
                 .collect(Collectors.toList());
 
-        return CollectionModel.of(customers, linkTo(methodOn(BookController.class).all()).withSelfRel());
+        return CollectionModel.of(books, linkTo(methodOn(BookController.class).all()).withSelfRel());
     }
 
     @PostMapping("/books")

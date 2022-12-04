@@ -16,9 +16,11 @@ import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.hateoas.RepresentationModel;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import jakarta.persistence.Column;
@@ -33,7 +35,8 @@ import jakarta.persistence.Entity;
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, 
                   property  = "id", 
                   scope     = Book.class)
-public class Book {
+@JsonIgnoreProperties("ordersIncludedIn")
+public class Book{
     private @Id @GeneratedValue Long id;
     private @NonNull @Column(unique = true) String name;
     private @NonNull String author;
