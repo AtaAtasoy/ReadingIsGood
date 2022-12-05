@@ -4,16 +4,13 @@ import com.fasterxml.jackson.annotation.*;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.util.Lazy;
-
-import java.io.Serializable;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@IdClass(OrderQuantityKey.class)
-public class OrderQuantity{
+@IdClass(OrderDetailPK.class)
+public class OrderDetail {
     @Id
     @ManyToOne
     @JoinColumn(name = "book_id", referencedColumnName = "id")

@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.ataatasoy.readingisgood.repository.BookRepository;
 import com.ataatasoy.readingisgood.repository.CustomerRepository;
-import com.ataatasoy.readingisgood.repository.OrderQuantityRepository;
+import com.ataatasoy.readingisgood.repository.OrderDetailRepository;
 import com.ataatasoy.readingisgood.repository.OrderRepository;
 
 @Configuration
@@ -20,7 +20,7 @@ public class LoadDatabase {
 
     @Bean
     CommandLineRunner initDatabase(CustomerRepository cRepository, BookRepository bRepository,
-            OrderRepository oRepository, OrderQuantityRepository oqRepository) {
+            OrderRepository oRepository, OrderDetailRepository oqRepository) {
         Book b1 = new Book();
         b1.setName("1984");
         b1.setAuthor("George Orwell");
@@ -41,14 +41,14 @@ public class LoadDatabase {
         c1.setEmail("doga@email.com");
         Order o1 = new Order(Status.IN_PROGRESS);
 
-        OrderQuantity oq1 = new OrderQuantity();
-        oq1.setQuantity(3);
-        oq1.setBook(b1);
-        oq1.setOrder(o1);
-        oq1.setPrice(b1.getPrice());
+        OrderDetail orderDetail = new OrderDetail();
+        orderDetail.setQuantity(3);
+        orderDetail.setBook(b1);
+        orderDetail.setOrder(o1);
+        orderDetail.setPrice(b1.getPrice());
 
-        b1.addQuantity(oq1);
-        o1.addQuantity(oq1);;
+        b1.addQuantity(orderDetail);
+        o1.addQuantity(orderDetail);;
 
         b1.addToOrder(o1);
         b2.addToOrder(o1);
@@ -62,7 +62,7 @@ public class LoadDatabase {
             log.info("Preloading " + bRepository.save(b1));
             log.info("Preloading " + bRepository.save(b2));
             log.info("Preloading " + oRepository.save(o1));
-            log.info("Preloading " + oqRepository.save(oq1));
+            log.info("Preloading " + oqRepository.save(orderDetail));
         };
     }
 

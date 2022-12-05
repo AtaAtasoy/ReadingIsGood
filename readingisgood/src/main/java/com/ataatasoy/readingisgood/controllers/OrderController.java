@@ -22,12 +22,9 @@ import com.ataatasoy.readingisgood.exceptions.OrderNotFoundException;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.springframework.format.annotation.DateTimeFormat;
@@ -36,11 +33,11 @@ import org.springframework.hateoas.CollectionModel;
 import com.ataatasoy.readingisgood.models.Book;
 import com.ataatasoy.readingisgood.models.Customer;
 import com.ataatasoy.readingisgood.models.Order;
-import com.ataatasoy.readingisgood.models.OrderQuantity;
+import com.ataatasoy.readingisgood.models.OrderDetail;
 import com.ataatasoy.readingisgood.models.Status;
 import com.ataatasoy.readingisgood.repository.BookRepository;
 import com.ataatasoy.readingisgood.repository.CustomerRepository;
-import com.ataatasoy.readingisgood.repository.OrderQuantityRepository;
+import com.ataatasoy.readingisgood.repository.OrderDetailRepository;
 import com.ataatasoy.readingisgood.repository.OrderRepository;
 
 import lombok.Data;
@@ -54,7 +51,7 @@ public class OrderController {
     private final CustomerController customerController;
     private final BookController bookController;
     private final CustomerRepository customerRepository;
-    private final OrderQuantityRepository orderQuantityRepository;
+    private final OrderDetailRepository orderDetailRepository;
 
     @GetMapping("/orders")
     public CollectionModel<EntityModel<Order>> all() {
@@ -87,20 +84,15 @@ public class OrderController {
     @PostMapping("/orders")
     ResponseEntity<?> newOrder(@RequestBody Order newOrder) {
         newOrder.setStatus(Status.IN_PROGRESS);
-        List<Long> bookIdList = new ArrayList<>();
         List<Book> parsedBooks = new ArrayList<>();
         
-        for (Book bookInOrder : newOrder.getOrderedBooks()) {
-            bookIdList.add(bookInOrder.getId());
-        }
-
         try {
             // Update stock
             for (Book bookInOrder : newOrder.getOrderedBooks()) {
                 Book savedBook = bookRepository.findById(bookInOrder.getId())
                         .orElseThrow(() -> new BookNotFoundException(bookInOrder.getId()));
                 int quantity = bookInOrder.getQuantity();
-                OrderQuantity oq = new OrderQuantity();
+                OrderDetail oq = new OrderDetail();
                 oq.setBook(savedBook);
                 oq.setOrder(newOrder);
                 oq.setQuantity(quantity);

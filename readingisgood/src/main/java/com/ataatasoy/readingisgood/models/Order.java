@@ -4,22 +4,10 @@ import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.RepresentationModel;
-
-import com.ataatasoy.readingisgood.assemblers.BookModelAssembler;
-import com.ataatasoy.readingisgood.controllers.BookController;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -51,13 +39,13 @@ public class Order{
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     @JsonProperty("orderDetails")
-    private List<OrderQuantity> quantities = new ArrayList<>();
+    private List<OrderDetail> quantities = new ArrayList<>();
 
     public void addBook(Book book) {
         orderedBooks.add(book);
     }
 
-    public void addQuantity(OrderQuantity quantity){
+    public void addQuantity(OrderDetail quantity){
         quantities.add(quantity);
     }
 }
