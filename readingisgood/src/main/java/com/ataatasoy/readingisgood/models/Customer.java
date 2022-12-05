@@ -34,7 +34,7 @@ public class Customer{
     private String surname;
     private @Column(unique = true) String email;
 
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "customer", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Order> orders = new ArrayList<>();
 
     public void addOrder(Order o){

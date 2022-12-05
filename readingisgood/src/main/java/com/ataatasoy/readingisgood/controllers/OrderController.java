@@ -36,9 +36,11 @@ import org.springframework.hateoas.CollectionModel;
 import com.ataatasoy.readingisgood.models.Book;
 import com.ataatasoy.readingisgood.models.Customer;
 import com.ataatasoy.readingisgood.models.Order;
+import com.ataatasoy.readingisgood.models.OrderQuantity;
 import com.ataatasoy.readingisgood.models.Status;
 import com.ataatasoy.readingisgood.repository.BookRepository;
 import com.ataatasoy.readingisgood.repository.CustomerRepository;
+import com.ataatasoy.readingisgood.repository.OrderQuantityRepository;
 import com.ataatasoy.readingisgood.repository.OrderRepository;
 
 import lombok.Data;
@@ -52,6 +54,7 @@ public class OrderController {
     private final CustomerController customerController;
     private final BookController bookController;
     private final CustomerRepository customerRepository;
+    private final OrderQuantityRepository orderQuantityRepository;
 
     @GetMapping("/orders")
     public CollectionModel<EntityModel<Order>> all() {
@@ -86,7 +89,7 @@ public class OrderController {
         newOrder.setStatus(Status.IN_PROGRESS);
         List<Long> bookIdList = new ArrayList<>();
         List<Book> parsedBooks = new ArrayList<>();
-
+        
         for (Book bookInOrder : newOrder.getOrderedBooks()) {
             bookIdList.add(bookInOrder.getId());
         }
@@ -96,21 +99,27 @@ public class OrderController {
             for (Book bookInOrder : newOrder.getOrderedBooks()) {
                 Book savedBook = bookRepository.findById(bookInOrder.getId())
                         .orElseThrow(() -> new BookNotFoundException(bookInOrder.getId()));
-                int orderedAmount = bookInOrder.getOrderAmount();
+                int quantity = bookInOrder.getQuantity();
+                OrderQuantity oq = new OrderQuantity();
+                oq.setBook(savedBook);
+                oq.setOrder(newOrder);
+                oq.setQuantity(quantity);
+                oq.setPrice(bookInOrder.getPrice());
 
-                savedBook.setStock(savedBook.getStock() - orderedAmount);
-                savedBook.setOrderAmount(savedBook.getOrderAmount() + orderedAmount);
+                newOrder.addQuantity(oq);
+                
+                savedBook.setStock(savedBook.getStock() - quantity);
+                savedBook.addQuantity(oq);
 
                 parsedBooks.add(savedBook);
             }
 
             // Populate the non-given fields using the records in the DB
             newOrder.setOrderedBooks(parsedBooks);
-
             Customer savedCustomer = customerRepository.findById(newOrder.getCustomer().getId())
                     .orElseThrow(() -> new CustomerNotFoundException(newOrder.getCustomer().getId()));
-            newOrder.setCustomer(savedCustomer);
 
+            newOrder.setCustomer(savedCustomer);
         } catch (IllegalArgumentException e) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
@@ -118,7 +127,6 @@ public class OrderController {
                     .body(Problem.create()
                             .withTitle("Could not find books"));
         }
-
         newOrder.getCustomer().addOrder(newOrder);
 
         return ResponseEntity.ok(EntityModel.of(orderRepository.save(newOrder),

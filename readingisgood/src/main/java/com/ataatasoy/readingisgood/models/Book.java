@@ -1,9 +1,6 @@
 package com.ataatasoy.readingisgood.models;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -12,7 +9,9 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicUpdate;
@@ -25,19 +24,17 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 @NoArgsConstructor
 @Getter
 @Setter
 @Entity
-@Table(name = "books")
+@Table(name="books")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = Book.class)
 @JsonIgnoreProperties("ordersIncludedIn")
 public class Book {
-    private @Id @GeneratedValue Long id;
+    private @Id @GeneratedValue(strategy = GenerationType.IDENTITY) Long id;
     private @Column(unique = true) String name;
     private String author;
     private @CreationTimestamp @Column(updatable = false) Date createdAt;
@@ -45,12 +42,29 @@ public class Book {
     private Integer stock;
     private Double price;
 
-    private Integer orderAmount = 0;
+    @JsonProperty(access = Access.WRITE_ONLY)
+    private Integer quantity = 0;
 
-    @ManyToMany(mappedBy = "orderedBooks")
+    @ManyToMany(mappedBy = "orderedBooks", cascade = CascadeType.ALL)
     private List<Order> ordersIncludedIn = new ArrayList<>();
+
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
+    @JsonProperty(access = Access.WRITE_ONLY)
+    private List<OrderQuantity> quantities = new ArrayList<>();
 
     public void addToOrder(Order order) {
         ordersIncludedIn.add(order);
+        /** 
+        OrderQuantity oq = new OrderQuantity();
+        oq.setBook(this);
+        oq.setOrder(order);
+        oq.setQuantity(quantity);
+        
+
+        quantities.add(oq);*/
+    }
+
+    public void addQuantity(OrderQuantity quantity){
+        quantities.add(quantity);
     }
 }
