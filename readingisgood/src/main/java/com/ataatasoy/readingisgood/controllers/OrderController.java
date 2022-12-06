@@ -85,7 +85,7 @@ public class OrderController {
     ResponseEntity<?> newOrder(@RequestBody Order newOrder) {
         newOrder.setStatus(Status.IN_PROGRESS);
         List<Book> parsedBooks = new ArrayList<>();
-        
+
         try {
             // Update stock
             for (Book bookInOrder : newOrder.getOrderedBooks()) {

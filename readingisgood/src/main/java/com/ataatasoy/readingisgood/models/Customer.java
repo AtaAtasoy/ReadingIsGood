@@ -27,7 +27,7 @@ import lombok.Setter;
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, 
                   property  = "id", 
                   scope     = Customer.class)
-@JsonIgnoreProperties("orders")
+@JsonIgnoreProperties({"orders", "statistics"})
 public class Customer{
     private @Id @GeneratedValue Long id; 
     private String name;
@@ -37,6 +37,8 @@ public class Customer{
     @OneToMany(mappedBy = "customer", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Order> orders = new ArrayList<>();
 
+    @OneToMany(mappedBy = "customer", orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<MonthlyStatistics> statistics = new ArrayList<>();
     public void addOrder(Order o){
         orders.add(o);
     }
