@@ -8,8 +8,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.ataatasoy.readingisgood.exceptions.InvalidCustomerException;
+
+import jakarta.validation.ConstraintViolationException;
+
 import com.ataatasoy.readingisgood.exceptions.CustomerNotFoundException;
 
 @ControllerAdvice
@@ -32,7 +36,19 @@ public class CustomerControllerAdvice {
             .status(HttpStatus.BAD_REQUEST)
             .header(HttpHeaders.CONTENT_TYPE, MediaTypes.HTTP_PROBLEM_DETAILS_JSON_VALUE)
             .body(Problem.create()
-                    .withTitle("Invalid customer").
+                    .withTitle("Invalid customer input").
                     withDetail(ex.getMessage()));
+  }
+
+
+  @ResponseBody
+  @ExceptionHandler(ConstraintViolationException.class)
+  ResponseEntity<Problem> constraintViolationHandler(ConstraintViolationException ex) {
+      return ResponseEntity
+              .status(HttpStatus.BAD_REQUEST)
+              .header(HttpHeaders.CONTENT_TYPE, MediaTypes.HTTP_PROBLEM_DETAILS_JSON_VALUE)
+              .body(Problem.create()
+                      .withTitle("Violeated constraints of order").
+                      withDetail(ex.getMessage()));
   }
 }

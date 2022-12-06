@@ -36,7 +36,11 @@ public class CustomerService {
 
     public Customer addNewCustomer(Customer newCustomer){
         validateCustomer(newCustomer);
-        return repository.save(newCustomer);
+        try {
+            return repository.save(newCustomer);
+        } catch (Exception e) {
+            throw new InvalidCustomerException("Could not save the input. email might be taken." + e.getMessage());
+        }
     }
 
     public Customer getCustomer(Long id){

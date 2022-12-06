@@ -48,7 +48,7 @@ public class BookController {
             EntityModel<Book> entityModel = assembler.toModel(book);
             return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
                     .body(entityModel);
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
             throw new InvalidBookException(e.getMessage());
         }
     }

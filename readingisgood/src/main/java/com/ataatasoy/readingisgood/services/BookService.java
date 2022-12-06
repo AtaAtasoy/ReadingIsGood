@@ -1,6 +1,7 @@
 package com.ataatasoy.readingisgood.services;
 
 import com.ataatasoy.readingisgood.exceptions.BookNotFoundException;
+import com.ataatasoy.readingisgood.exceptions.InvalidBookException;
 import com.ataatasoy.readingisgood.models.Book;
 import com.ataatasoy.readingisgood.repository.BookRepository;
 import jakarta.validation.ConstraintViolation;
@@ -41,7 +42,11 @@ public class BookService {
 
     public Book addNewBook(Book book) {
         validateBook(book);
-        return repository.save(book);
+        try{
+            return repository.save(book);
+        } catch(Exception e){
+            throw new InvalidBookException("Could not save the book." + e.getMessage());
+        }
     }
 
     public Book getBook(Long id) {

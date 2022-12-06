@@ -8,9 +8,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.ataatasoy.readingisgood.exceptions.InvalidBookException;
+
+import jakarta.validation.ConstraintViolationException;
+
 import com.ataatasoy.readingisgood.exceptions.BookNotFoundException;
 
 @ControllerAdvice
@@ -28,13 +30,23 @@ public class BookControllerAdvice {
 
     @ResponseBody
     @ExceptionHandler(InvalidBookException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     ResponseEntity<Problem> invalidBookHandler(InvalidBookException ex) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .header(HttpHeaders.CONTENT_TYPE, MediaTypes.HTTP_PROBLEM_DETAILS_JSON_VALUE)
                 .body(Problem.create()
-                        .withTitle("Book already exists").
+                        .withTitle("Invalid book input").
+                        withDetail(ex.getMessage()));
+    }
+
+    @ResponseBody
+    @ExceptionHandler(ConstraintViolationException.class)
+    ResponseEntity<Problem> constraintViolationHandler(ConstraintViolationException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .header(HttpHeaders.CONTENT_TYPE, MediaTypes.HTTP_PROBLEM_DETAILS_JSON_VALUE)
+                .body(Problem.create()
+                        .withTitle("Violeated constraints of book").
                         withDetail(ex.getMessage()));
     }
 }

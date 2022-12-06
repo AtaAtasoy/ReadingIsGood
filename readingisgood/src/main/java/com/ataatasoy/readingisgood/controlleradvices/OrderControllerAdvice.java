@@ -1,8 +1,12 @@
 package com.ataatasoy.readingisgood.controlleradvices;
 
 import com.ataatasoy.readingisgood.exceptions.IllegalOrderMethodException;
+import com.ataatasoy.readingisgood.exceptions.InvalidOrderException;
 import com.ataatasoy.readingisgood.exceptions.OrderNotFoundInRangeException;
 import com.ataatasoy.readingisgood.exceptions.OrdersDoNotExistException;
+
+import jakarta.validation.ConstraintViolationException;
+
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.mediatype.problem.Problem;
 import org.springframework.http.HttpHeaders;
@@ -19,9 +23,24 @@ import com.ataatasoy.readingisgood.exceptions.OrderNotFoundException;
 public class OrderControllerAdvice {
     @ResponseBody
     @ExceptionHandler(OrderNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    String customerNotFoundHandler(OrderNotFoundException ex) {
-        return ex.getMessage();
+    ResponseEntity<Problem> orderNotFoundHandler(OrderNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .header(HttpHeaders.CONTENT_TYPE, MediaTypes.HTTP_PROBLEM_DETAILS_JSON_VALUE)
+                .body(Problem.create()
+                        .withTitle("Order not found").
+                        withDetail(ex.getMessage()));
+    }
+
+    @ResponseBody
+    @ExceptionHandler(InvalidOrderException.class)
+    ResponseEntity<Problem> invalidOrderHandler(InvalidOrderException ex){
+        return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
+        .header(HttpHeaders.CONTENT_TYPE, MediaTypes.HTTP_PROBLEM_DETAILS_JSON_VALUE)
+                .body(Problem.create()
+                        .withTitle("Invalid order input").
+                        withDetail(ex.getMessage()));
     }
 
     @ResponseBody
@@ -55,5 +74,16 @@ public class OrderControllerAdvice {
                 .body(Problem.create() //
                         .withTitle("Method not allowed") //
                         .withDetail(ex.getMessage()));
+    }
+
+    @ResponseBody
+    @ExceptionHandler(ConstraintViolationException.class)
+    ResponseEntity<Problem> constraintViolationHandler(ConstraintViolationException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .header(HttpHeaders.CONTENT_TYPE, MediaTypes.HTTP_PROBLEM_DETAILS_JSON_VALUE)
+                .body(Problem.create()
+                        .withTitle("Violeated constraints of order").
+                        withDetail(ex.getMessage()));
     }
 }

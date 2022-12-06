@@ -2,9 +2,11 @@
 
 ## Use Cases
 
-* Registering new customer
-* Placing new order
-* Tracking stock of books
-* List all orders of the customer
-* Viewing the order details
-* Query Monthly Statistics
+- [ X] Registering new customer
+- 
+
+* Placing new order [X]
+* Tracking stock of books [X]
+* List all orders of the customer w/ pagination [X]
+* Viewing the order details w/ (startDate - endDate) [X]
+* Query Monthly Statistics [X]

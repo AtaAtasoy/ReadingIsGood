@@ -86,7 +86,12 @@ public class OrderService {
         newOrder.getCustomer().addOrder(newOrder);
 
         validateOrder(newOrder);
-        return orderRepository.save(newOrder);
+        try {
+            return orderRepository.save(newOrder);
+        } catch (Exception e) {
+            throw new InvalidOrderException(e.getMessage());
+        }
+        
     }
 
     public List<Order> getOrdersBetweenDate(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
