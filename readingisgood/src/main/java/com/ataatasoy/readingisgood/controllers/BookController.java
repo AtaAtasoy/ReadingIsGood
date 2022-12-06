@@ -7,6 +7,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,12 +34,14 @@ public class BookController {
     private final BookModelAssembler assembler;
 
     @GetMapping("/books")
-    public CollectionModel<EntityModel<Book>> all() {
+    public ResponseEntity<CollectionModel<EntityModel<Book>>> all() {
         List<EntityModel<Book>> books = repository.findAll().stream() //
                 .map(assembler::toModel)
                 .collect(Collectors.toList());
 
-        return CollectionModel.of(books, linkTo(methodOn(BookController.class).all()).withSelfRel());
+        CollectionModel<EntityModel<Book>> booksModel = CollectionModel.of(books, linkTo(methodOn(BookController.class).all()).withSelfRel());
+
+        return ResponseEntity.status(HttpStatus.OK).body(booksModel);
     }
 
     @PostMapping("/books")
@@ -53,10 +57,11 @@ public class BookController {
     }
 
     @GetMapping("/books/{id}")
-    public EntityModel<Book> one(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<Book>> one(@PathVariable Long id) {
         Book book = repository.findById(id).orElseThrow(() -> new BookNotFoundException(id));
+        EntityModel<Book> model = assembler.toModel(book);
 
-        return assembler.toModel(book);
+        return ResponseEntity.status(HttpStatus.OK).body(model);
     }
 
     @PutMapping("/books/{id}")

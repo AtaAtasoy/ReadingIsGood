@@ -10,6 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,7 +46,7 @@ public class CustomerController {
                 .collect(Collectors.toList());
 
         CollectionModel<EntityModel<Customer>> customerModels = CollectionModel.of(customers, linkTo(methodOn(CustomerController.class).all()).withSelfRel());
-        return ResponseEntity.created(customerModels.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(customerModels);
+        return ResponseEntity.status(HttpStatus.OK).body(customerModels);
     }
 
     @PostMapping("/customers")
@@ -63,7 +64,7 @@ public class CustomerController {
         try{
             Customer customer = customerRepository.findById(id).orElseThrow(() -> new CustomerNotFoundException(id));
             EntityModel<Customer> entityModel = customerModelAssembler.toModel(customer);
-            return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
+            return ResponseEntity.status(HttpStatus.OK).body(entityModel);
         } catch (IllegalArgumentException e){
             throw new CustomerNotFoundException(id);
         }
@@ -83,7 +84,7 @@ public class CustomerController {
 
             CollectionModel<EntityModel<Order>> collectionModel = CollectionModel.of(orders, linkTo(methodOn(OrderController.class).all()).withSelfRel());
 
-            return  ResponseEntity.created(collectionModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(collectionModel);
+            return  ResponseEntity.status(HttpStatus.OK).body(collectionModel);
         } catch (IllegalArgumentException e){
             throw new CustomerNotFoundException(id);
         }
