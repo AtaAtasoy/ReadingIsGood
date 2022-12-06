@@ -3,7 +3,8 @@ package com.ataatasoy.readingisgood.controllers;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.dao.DataIntegrityViolationException;
+import com.ataatasoy.readingisgood.services.CustomerService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -22,7 +23,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import com.ataatasoy.readingisgood.assemblers.CustomerModelAssembler;
 import com.ataatasoy.readingisgood.assemblers.OrderModelAssembler;
-import com.ataatasoy.readingisgood.exceptions.CustomerAlreadyExistsException;
+import com.ataatasoy.readingisgood.exceptions.InvalidCustomerException;
 import com.ataatasoy.readingisgood.exceptions.CustomerNotFoundException;
 import com.ataatasoy.readingisgood.models.Customer;
 import com.ataatasoy.readingisgood.models.Order;
@@ -39,35 +40,38 @@ public class CustomerController {
     private final CustomerModelAssembler customerModelAssembler;
     private final OrderModelAssembler orderModelAssembler;
 
+    @Autowired
+    private CustomerService customerService;
+
     @GetMapping("/customers")
     public ResponseEntity<CollectionModel<EntityModel<Customer>>> all() {
-        List<EntityModel<Customer>> customers = customerRepository.findAll().stream() //
+        List<Customer> customers = customerService.getAllCustomers();
+        List<EntityModel<Customer>> customerModels = customers.stream() //
                 .map(customerModelAssembler::toModel)
-                .collect(Collectors.toList());
+                .toList();
 
-        CollectionModel<EntityModel<Customer>> customerModels = CollectionModel.of(customers, linkTo(methodOn(CustomerController.class).all()).withSelfRel());
-        return ResponseEntity.status(HttpStatus.OK).body(customerModels);
+        CollectionModel<EntityModel<Customer>> customerModelCollection = CollectionModel.of(customerModels,
+                linkTo(methodOn(CustomerController.class).all()).withSelfRel());
+        return ResponseEntity.status(HttpStatus.OK).body(customerModelCollection);
     }
 
     @PostMapping("/customers")
     ResponseEntity<EntityModel<Customer>> newCustomer(@RequestBody Customer newCustomer){
+        Customer savedCustomer = customerService.addNewCustomer(newCustomer);
         try {
-            EntityModel<Customer> entityModel = customerModelAssembler.toModel(customerRepository.save(newCustomer));
+            EntityModel<Customer> entityModel = customerModelAssembler.toModel(savedCustomer);
             return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
-        } catch (DataIntegrityViolationException e) {
-            throw new CustomerAlreadyExistsException(newCustomer.getEmail());
+        } catch (IllegalArgumentException e) {
+            throw new InvalidCustomerException(newCustomer.getEmail());
         }
     }
 
     @GetMapping("/customers/{id}")
     public ResponseEntity<EntityModel<Customer>> one(@PathVariable Long id) {
-        try{
-            Customer customer = customerRepository.findById(id).orElseThrow(() -> new CustomerNotFoundException(id));
-            EntityModel<Customer> entityModel = customerModelAssembler.toModel(customer);
-            return ResponseEntity.status(HttpStatus.OK).body(entityModel);
-        } catch (IllegalArgumentException e){
-            throw new CustomerNotFoundException(id);
-        }
+        Customer customer = customerService.getCustomer(id);
+
+        EntityModel<Customer> entityModel = customerModelAssembler.toModel(customer);
+        return ResponseEntity.status(HttpStatus.OK).body(entityModel);
     }
 
     //TODO: Index and PageSize checks

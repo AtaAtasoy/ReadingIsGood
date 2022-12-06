@@ -29,8 +29,6 @@ public class UserAccountService {
             }
             throw new ConstraintViolationException("Error occurred: " + sb.toString(), violations);
         }
-
-        repository.save(userAccount);
         return "Account for " + userAccount.getName() + " Added!";
     }
 

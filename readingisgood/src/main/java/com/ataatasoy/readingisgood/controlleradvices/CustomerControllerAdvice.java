@@ -8,9 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.ataatasoy.readingisgood.exceptions.CustomerAlreadyExistsException;
+import com.ataatasoy.readingisgood.exceptions.InvalidCustomerException;
 import com.ataatasoy.readingisgood.exceptions.CustomerNotFoundException;
 
 @ControllerAdvice
@@ -27,13 +26,13 @@ public class CustomerControllerAdvice {
   }
 
   @ResponseBody
-  @ExceptionHandler(CustomerAlreadyExistsException.class)
-  ResponseEntity<Problem> customerAlreadyExistsHandler(CustomerAlreadyExistsException ex) {
+  @ExceptionHandler(InvalidCustomerException.class)
+  ResponseEntity<Problem> invalidCustomerHandler(InvalidCustomerException ex) {
     return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
             .header(HttpHeaders.CONTENT_TYPE, MediaTypes.HTTP_PROBLEM_DETAILS_JSON_VALUE)
             .body(Problem.create()
-                    .withTitle("Customer already exists").
+                    .withTitle("Invalid customer").
                     withDetail(ex.getMessage()));
   }
 }

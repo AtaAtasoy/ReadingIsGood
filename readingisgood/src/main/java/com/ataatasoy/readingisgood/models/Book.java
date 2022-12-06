@@ -1,6 +1,8 @@
 package com.ataatasoy.readingisgood.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -27,11 +29,17 @@ import com.fasterxml.jackson.annotation.JsonProperty.Access;
 @JsonIgnoreProperties("ordersIncludedIn")
 public class Book {
     private @Id @GeneratedValue(strategy = GenerationType.IDENTITY) Long id;
-    private @Column(unique = true) String name;
+    @Column(unique = true)
+    @NotBlank(message = "Name must not be blank")
+    private String name;
+    @NotBlank(message = "Author must not be blank")
     private String author;
     private @CreationTimestamp @Column(updatable = false) Date createdAt;
     private @UpdateTimestamp Date lastUpdatedAt;
+    @Min(value = 0, message = "Stock should not be less than 0")
+
     private Integer stock;
+    @Min(value = 0, message = "Price should not be less than 18")
     private Double price;
 
     @JsonProperty(access = Access.WRITE_ONLY)

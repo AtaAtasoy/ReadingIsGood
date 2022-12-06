@@ -1,0 +1,64 @@
+package com.ataatasoy.readingisgood.services;
+
+import com.ataatasoy.readingisgood.assemblers.CustomerModelAssembler;
+import com.ataatasoy.readingisgood.controllers.OrderController;
+import com.ataatasoy.readingisgood.exceptions.CustomerNotFoundException;
+import com.ataatasoy.readingisgood.exceptions.InvalidCustomerException;
+import com.ataatasoy.readingisgood.models.Customer;
+import com.ataatasoy.readingisgood.models.Order;
+import com.ataatasoy.readingisgood.repository.CustomerRepository;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
+@Service
+public class CustomerService {
+    @Autowired
+    private Validator validator;
+
+    @Autowired
+    private CustomerRepository repository;
+    
+    private void validateCustomer(Customer customer) {
+        Set<ConstraintViolation<Customer>> violations = validator.validate(customer);
+        if (!violations.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            for (ConstraintViolation<Customer> constraintViolation : violations) {
+                sb.append(constraintViolation.getMessage());
+            }
+            throw new InvalidCustomerException("Error occurred: " + sb.toString());
+        }
+    }
+
+    public List<Customer> getAllCustomers(){
+        return repository.findAll();
+    }
+
+    public Customer addNewCustomer(Customer newCustomer){
+        validateCustomer(newCustomer);
+        return repository.save(newCustomer);
+    }
+
+    public Customer getCustomer(Long id){
+        Customer c = repository.findById(id).orElseThrow(() -> new CustomerNotFoundException(id));
+        validateCustomer(c);
+        return c;
+    }
+
+}
