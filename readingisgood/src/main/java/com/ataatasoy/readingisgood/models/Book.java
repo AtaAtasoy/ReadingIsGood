@@ -28,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonProperty.Access;
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = Book.class)
 @JsonIgnoreProperties("ordersIncludedIn")
 public class Book {
+    @Column(name = "book_id")
     private @Id @GeneratedValue(strategy = GenerationType.IDENTITY) Long id;
     @Column(unique = true)
     @NotBlank(message = "Name must not be blank")

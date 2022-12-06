@@ -36,8 +36,6 @@ public class Customer{
     @OneToMany(mappedBy = "customer", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Order> orders = new ArrayList<>();
 
-    @OneToMany(mappedBy = "customer", orphanRemoval = true, cascade = CascadeType.ALL)
-    private List<MonthlyStatistics> statistics = new ArrayList<>();
     public void addOrder(Order o){
         orders.add(o);
     }

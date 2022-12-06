@@ -13,12 +13,12 @@ import lombok.*;
 public class OrderDetail {
     @Id
     @ManyToOne
-    @JoinColumn(name = "book_id", referencedColumnName = "id")
+    @JoinColumn(name = "book_id", referencedColumnName = "book_id")
     private Book book;
 
     @Id
     @ManyToOne
-    @JoinColumn(name = "order_id", referencedColumnName = "id")
+    @JoinColumn(name = "order_id", referencedColumnName = "order_id")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Order order;
 

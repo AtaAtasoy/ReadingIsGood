@@ -24,6 +24,7 @@ import lombok.Setter;
                   property  = "id", 
                   scope     = Order.class)
 public class Order{
+    @Column(name = "order_id")
     private @Id @GeneratedValue(strategy = GenerationType.IDENTITY) Long id;
     private  @CreationTimestamp @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime createdAt;
     private @lombok.NonNull OrderStatus orderStatus;

@@ -17,4 +17,5 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("select o from Order o where o.createdAt >= :start and o.createdAt <= :end ")
     List<Order> findByCreatedAtBetween(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) @Param("start") LocalDateTime start,
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) @Param("end") LocalDateTime end);
+
 }
