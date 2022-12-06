@@ -3,6 +3,8 @@ package com.ataatasoy.readingisgood.controllers;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.ataatasoy.readingisgood.services.BookService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -26,70 +28,28 @@ import com.ataatasoy.readingisgood.repository.BookRepository;
 
 import lombok.Data;
 
-@Data
 @RestController
 public class BookController {
-
-    private final BookRepository repository;
-    private final BookModelAssembler assembler;
+    @Autowired
+    private BookService service;
 
     @GetMapping("/books")
     public ResponseEntity<CollectionModel<EntityModel<Book>>> all() {
-        List<EntityModel<Book>> books = repository.findAll().stream() //
-                .map(assembler::toModel)
-                .collect(Collectors.toList());
-
-        CollectionModel<EntityModel<Book>> booksModel = CollectionModel.of(books, linkTo(methodOn(BookController.class).all()).withSelfRel());
-
-        return ResponseEntity.status(HttpStatus.OK).body(booksModel);
+       return service.getAllBooks();
     }
 
     @PostMapping("/books")
     ResponseEntity<?> newCustomer(@RequestBody Book newBook) {
-        try {
-            EntityModel<Book> entityModel = assembler.toModel(repository.save(newBook));
-
-            return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
-                    .body(entityModel);
-        } catch (DataIntegrityViolationException e) {
-            throw new BookAlreadyExistsException(newBook.getName());
-        }
+       return service.addNewBook(newBook);
     }
 
     @GetMapping("/books/{id}")
     public ResponseEntity<EntityModel<Book>> one(@PathVariable Long id) {
-        Book book = repository.findById(id).orElseThrow(() -> new BookNotFoundException(id));
-        EntityModel<Book> model = assembler.toModel(book);
-
-        return ResponseEntity.status(HttpStatus.OK).body(model);
+        return service.getBook(id);
     }
 
     @PutMapping("/books/{id}")
     ResponseEntity<?> updateBook(@RequestBody Book newBook, @PathVariable Long id) {
-        Book updatedBook = repository.findById(id).map(book -> {
-            // There has to be a better way
-            if (newBook.getAuthor() != null)
-                book.setAuthor(newBook.getAuthor());
-
-            if (newBook.getName() != null)
-                book.setName(newBook.getName());
-
-            if (newBook.getStock() != null)
-                book.setStock(newBook.getStock());
-
-            if (newBook.getPrice() != null)
-                book.setPrice(newBook.getPrice());
-            
-            return repository.save(book);
-        })
-                .orElseGet(() -> {
-                    newBook.setId(id);
-                    return repository.save(newBook);
-                });
-
-        EntityModel<Book> entityModel = assembler.toModel(updatedBook);
-        return ResponseEntity //
-                .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()) //
-                .body(entityModel);
+        return service.updateBook(id, newBook);
     }
 }
