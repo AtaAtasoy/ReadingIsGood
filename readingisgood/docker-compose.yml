@@ -1,0 +1,15 @@
+version: '1'
+services:
+  reading-is-good-server:
+    container_name: reading-is-good
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: reading-is-good:latest
+    ports:
+      - 8080:8080
+    networks:
+      - spring-cloud-network
+networks:
+  spring-cloud-network:
+    driver: bridge
