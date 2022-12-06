@@ -1,26 +1,18 @@
 package com.ataatasoy.readingisgood.repository;
 
 import com.ataatasoy.readingisgood.models.Statistics;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
-import org.hibernate.query.sql.internal.NativeQueryImpl;
-import org.hibernate.transform.AliasToEntityMapResultTransformer;
 import org.springframework.stereotype.Repository;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+
 
 @Repository
 public class StatisticsRepository{
     @PersistenceContext
     EntityManager entityManager;
-
-    private ObjectMapper mapper = new ObjectMapper();
 
     public List<Statistics> findMonthlyStatisticsForCustomer(Long customerId){
         Query q = entityManager.createNativeQuery("SELECT rand() as id, COUNT(DISTINCT order_id) AS total_order_count,SUM(quantity) AS total_book_count," +
