@@ -33,52 +33,59 @@ import lombok.Data;
 @Data
 @RestController
 public class CustomerController {
-    private final CustomerRepository repository;
-    private final OrderRepository oRepository;
-    private final CustomerModelAssembler cModelAssembler;
-    private final OrderModelAssembler oModelAssembler;
+    private final CustomerRepository customerRepository;
+    private final OrderRepository orderRepository;
+    private final CustomerModelAssembler customerModelAssembler;
+    private final OrderModelAssembler orderModelAssembler;
 
     @GetMapping("/customers")
-    public CollectionModel<EntityModel<Customer>> all() {
-        List<EntityModel<Customer>> customers = repository.findAll().stream() //
-                .map(cModelAssembler::toModel)
+    public ResponseEntity<CollectionModel<EntityModel<Customer>>> all() {
+        List<EntityModel<Customer>> customers = customerRepository.findAll().stream() //
+                .map(customerModelAssembler::toModel)
                 .collect(Collectors.toList());
 
-        return CollectionModel.of(customers, linkTo(methodOn(CustomerController.class).all()).withSelfRel());
+        CollectionModel<EntityModel<Customer>> customerModels = CollectionModel.of(customers, linkTo(methodOn(CustomerController.class).all()).withSelfRel());
+        return ResponseEntity.created(customerModels.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(customerModels);
     }
 
     @PostMapping("/customers")
-    ResponseEntity<?> newCustomer(@RequestBody Customer newCustomer){
+    ResponseEntity<EntityModel<Customer>> newCustomer(@RequestBody Customer newCustomer){
         try {
-            EntityModel<Customer> entityModel = cModelAssembler.toModel(repository.save(newCustomer));
-
+            EntityModel<Customer> entityModel = customerModelAssembler.toModel(customerRepository.save(newCustomer));
             return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
         } catch (DataIntegrityViolationException e) {
             throw new CustomerAlreadyExistsException(newCustomer.getEmail());
         }
     }
 
-
     @GetMapping("/customers/{id}")
-    public EntityModel<Customer> one(@PathVariable Long id) {
-        Customer customer = repository.findById(id).orElseThrow(() -> new CustomerNotFoundException(id));
-
-        return cModelAssembler.toModel(customer);
+    public ResponseEntity<EntityModel<Customer>> one(@PathVariable Long id) {
+        try{
+            Customer customer = customerRepository.findById(id).orElseThrow(() -> new CustomerNotFoundException(id));
+            EntityModel<Customer> entityModel = customerModelAssembler.toModel(customer);
+            return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
+        } catch (IllegalArgumentException e){
+            throw new CustomerNotFoundException(id);
+        }
     }
 
     //TODO: Index and PageSize checks
-    //TODO: Add 'total' and 'page' fields to response
     @GetMapping("/customers/{id}/orders")
-    CollectionModel<EntityModel<Order>> allOrders(@PathVariable Long id, @RequestParam(required = false) int offset, @RequestParam(required = false) int pageSize) {
-        Customer c = repository.findById(id).orElseThrow(() -> new CustomerNotFoundException(id));
-        Pageable paging = PageRequest.of(offset, pageSize, Sort.by("createdAt"));
-        List<Order> pagedResult = oRepository.findByCustomerId(c.getId(), paging);
+    ResponseEntity<CollectionModel<EntityModel<Order>>> allOrders(@PathVariable Long id, @RequestParam(required = false) int offset, @RequestParam(required = false) int pageSize) {
+        try{
+            Customer c = customerRepository.findById(id).orElseThrow(() -> new CustomerNotFoundException(id));
+            Pageable paging = PageRequest.of(offset, pageSize, Sort.by("createdAt"));
+            List<Order> pagedResult = orderRepository.findByCustomerId(c.getId(), paging);
 
+            List<EntityModel<Order>> orders = pagedResult.stream()
+                    .map(orderModelAssembler::toModel)
+                    .collect(Collectors.toList());
 
-        List<EntityModel<Order>> orders = pagedResult.stream()
-                .map(oModelAssembler::toModel)
-                .collect(Collectors.toList());
+            CollectionModel<EntityModel<Order>> collectionModel = CollectionModel.of(orders, linkTo(methodOn(OrderController.class).all()).withSelfRel());
 
-        return CollectionModel.of(orders, linkTo(methodOn(OrderController.class).all()).withSelfRel());
+            return  ResponseEntity.created(collectionModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(collectionModel);
+        } catch (IllegalArgumentException e){
+            throw new CustomerNotFoundException(id);
+        }
     }
 }

@@ -26,5 +26,6 @@ public class OrderDetail {
     private Integer quantity;
 
     @Column(name = "price")
+    @JsonProperty("paid_price")
     private Double price;
 }
