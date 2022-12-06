@@ -7,7 +7,6 @@ import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.SmartValidator;
 
 import java.util.Set;
 
@@ -29,6 +28,7 @@ public class UserAccountService {
             }
             throw new ConstraintViolationException("Error occurred: " + sb.toString(), violations);
         }
+        repository.save(userAccount);
         return "Account for " + userAccount.getName() + " Added!";
     }
 

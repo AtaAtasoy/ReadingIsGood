@@ -1,7 +1,6 @@
 package com.ataatasoy.readingisgood.services;
 
 import com.ataatasoy.readingisgood.exceptions.BookNotFoundException;
-import com.ataatasoy.readingisgood.exceptions.InvalidBookException;
 import com.ataatasoy.readingisgood.models.Book;
 import com.ataatasoy.readingisgood.repository.BookRepository;
 import jakarta.validation.ConstraintViolation;
@@ -34,13 +33,8 @@ public class BookService {
 
     public List<Book> getAllBooks() {
         List<Book> books = repository.findAll();
-        Set<ConstraintViolation<List<Book>>> violations = validator.validate(books);
-        if (!violations.isEmpty()) {
-            StringBuilder sb = new StringBuilder();
-            for (ConstraintViolation<List<Book>> constraintViolation : violations) {
-                sb.append(constraintViolation.getMessage());
-            }
-            throw new ConstraintViolationException("Error occurred: " + sb.toString(), violations);
+        if (books.isEmpty()){
+            throw new BookNotFoundException(0L);
         }
         return books;
     }

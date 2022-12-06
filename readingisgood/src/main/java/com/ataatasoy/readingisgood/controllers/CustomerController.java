@@ -4,10 +4,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.ataatasoy.readingisgood.services.CustomerService;
+import com.ataatasoy.readingisgood.services.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -24,24 +23,22 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 import com.ataatasoy.readingisgood.assemblers.CustomerModelAssembler;
 import com.ataatasoy.readingisgood.assemblers.OrderModelAssembler;
 import com.ataatasoy.readingisgood.exceptions.InvalidCustomerException;
-import com.ataatasoy.readingisgood.exceptions.CustomerNotFoundException;
 import com.ataatasoy.readingisgood.models.Customer;
 import com.ataatasoy.readingisgood.models.Order;
-import com.ataatasoy.readingisgood.repository.CustomerRepository;
-import com.ataatasoy.readingisgood.repository.OrderRepository;
 
-import lombok.Data;
-
-@Data
 @RestController
 public class CustomerController {
-    private final CustomerRepository customerRepository;
-    private final OrderRepository orderRepository;
-    private final CustomerModelAssembler customerModelAssembler;
-    private final OrderModelAssembler orderModelAssembler;
+
+    @Autowired
+    private CustomerModelAssembler customerModelAssembler;
+    @Autowired
+    private OrderModelAssembler orderModelAssembler;
 
     @Autowired
     private CustomerService customerService;
+
+    @Autowired
+    private OrderService orderService;
 
     @GetMapping("/customers")
     public ResponseEntity<CollectionModel<EntityModel<Customer>>> all() {
@@ -76,21 +73,15 @@ public class CustomerController {
 
     //TODO: Index and PageSize checks
     @GetMapping("/customers/{id}/orders")
-    ResponseEntity<CollectionModel<EntityModel<Order>>> allOrders(@PathVariable Long id, @RequestParam(required = false) int offset, @RequestParam(required = false) int pageSize) {
-        try{
-            Customer c = customerRepository.findById(id).orElseThrow(() -> new CustomerNotFoundException(id));
-            Pageable paging = PageRequest.of(offset, pageSize, Sort.by("createdAt"));
-            List<Order> pagedResult = orderRepository.findByCustomerId(c.getId(), paging);
+    ResponseEntity<CollectionModel<EntityModel<Order>>> allOrders(@PathVariable Long id, @RequestParam int offset,
+                                                                  @RequestParam int pageSize) {
+        List<EntityModel<Order>> orders = orderService.getPagedOrdersOfCustomer(id, offset, pageSize).stream()
+                .map(orderModelAssembler::toModel)
+                .collect(Collectors.toList());
 
-            List<EntityModel<Order>> orders = pagedResult.stream()
-                    .map(orderModelAssembler::toModel)
-                    .collect(Collectors.toList());
+        CollectionModel<EntityModel<Order>> collectionModel = CollectionModel.of(orders,
+                linkTo(methodOn(OrderController.class).all()).withSelfRel());
 
-            CollectionModel<EntityModel<Order>> collectionModel = CollectionModel.of(orders, linkTo(methodOn(OrderController.class).all()).withSelfRel());
-
-            return  ResponseEntity.status(HttpStatus.OK).body(collectionModel);
-        } catch (IllegalArgumentException e){
-            throw new CustomerNotFoundException(id);
-        }
+        return  ResponseEntity.status(HttpStatus.OK).body(collectionModel);
     }
 }
