@@ -28,7 +28,6 @@ public class CustomerControllerAdvice {
 
   @ResponseBody
   @ExceptionHandler(CustomerAlreadyExistsException.class)
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
   ResponseEntity<Problem> customerAlreadyExistsHandler(CustomerAlreadyExistsException ex) {
     return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)

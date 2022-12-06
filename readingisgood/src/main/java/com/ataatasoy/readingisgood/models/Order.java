@@ -26,7 +26,7 @@ import lombok.Setter;
 public class Order{
     private @Id @GeneratedValue(strategy = GenerationType.IDENTITY) Long id;
     private  @CreationTimestamp @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime createdAt;
-    private @lombok.NonNull Status status;
+    private @lombok.NonNull OrderStatus orderStatus;
     
     @ManyToOne
     @JoinColumn(name = "customer_id")

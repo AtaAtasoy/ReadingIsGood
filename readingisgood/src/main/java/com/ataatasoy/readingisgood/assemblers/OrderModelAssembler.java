@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.ataatasoy.readingisgood.controllers.OrderController;
 import com.ataatasoy.readingisgood.models.Order;
-import com.ataatasoy.readingisgood.models.Status;
+import com.ataatasoy.readingisgood.models.OrderStatus;
 
 @Component
 public class OrderModelAssembler implements RepresentationModelAssembler<Order, EntityModel<Order>> {
@@ -20,7 +20,7 @@ public class OrderModelAssembler implements RepresentationModelAssembler<Order, 
         linkTo(methodOn(OrderController.class).one(order.getId())).withSelfRel(),
         linkTo(methodOn(OrderController.class).all()).withRel("orders"));
 
-    if (order.getStatus() == Status.IN_PROGRESS) {
+    if (order.getOrderStatus() == OrderStatus.IN_PROGRESS) {
       orderModel.add(linkTo(methodOn(OrderController.class).cancel(order.getId())).withRel("cancel"));
       orderModel.add(linkTo(methodOn(OrderController.class).complete(order.getId())).withRel("complete"));
     }

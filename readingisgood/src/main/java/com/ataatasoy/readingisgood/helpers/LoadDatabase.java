@@ -39,7 +39,7 @@ public class LoadDatabase {
         c1.setName("Doga");
         c1.setSurname("Erdem");
         c1.setEmail("doga@email.com");
-        Order o1 = new Order(Status.IN_PROGRESS);
+        Order o1 = new Order(OrderStatus.IN_PROGRESS);
 
         OrderDetail orderDetail = new OrderDetail();
         orderDetail.setQuantity(3);
