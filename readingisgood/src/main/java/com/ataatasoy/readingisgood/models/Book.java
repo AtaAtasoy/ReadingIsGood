@@ -3,9 +3,7 @@ package com.ataatasoy.readingisgood.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,6 +19,8 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 @NoArgsConstructor
+@RequiredArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @Entity
@@ -32,16 +32,15 @@ public class Book {
     private @Id @GeneratedValue(strategy = GenerationType.IDENTITY) Long id;
     @Column(unique = true)
     @NotBlank(message = "Name must not be blank")
-    private String name;
+    private @NonNull String name;
     @NotBlank(message = "Author must not be blank")
-    private String author;
+    private @NonNull String author;
     private @CreationTimestamp @Column(updatable = false) Date createdAt;
     private @UpdateTimestamp Date lastUpdatedAt;
     @Min(value = 0, message = "Stock should not be less than 0")
-
-    private Integer stock;
-    @Min(value = 0, message = "Price should not be less than 18")
-    private Double price;
+    private @NonNull Integer stock;
+    @Min(value = 0, message = "Price should not be less than 0")
+    private @NonNull Double price;
 
     @JsonProperty(access = Access.WRITE_ONLY)
     private Integer quantity = 0;

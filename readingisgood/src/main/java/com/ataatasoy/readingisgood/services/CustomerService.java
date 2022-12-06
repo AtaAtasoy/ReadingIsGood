@@ -16,7 +16,6 @@ import java.util.Set;
 public class CustomerService {
     @Autowired
     private Validator validator;
-
     @Autowired
     private CustomerRepository repository;
 
